@@ -1,4 +1,6 @@
 
+import { classifyUrgency, UrgencyLevel } from './urgencyClassifier';
+
 export interface FormData {
   fullName: string;
   email: string;
@@ -109,24 +111,5 @@ export const sanitizeInput = (input: string): string => {
     .replace(/on\w+\s*=/gi, '');
 };
 
-export const classifyUrgency = (description: string): 'low' | 'medium' | 'high' | 'urgent' => {
-  const urgentKeywords = ['urgente', 'emergência', 'crítico', 'parado', 'hoje', 'agora'];
-  const highKeywords = ['rápido', 'prazo curto', 'esta semana', 'importante'];
-  const mediumKeywords = ['próxima semana', 'próximo mês', 'médio prazo'];
-  
-  const lowerDescription = description.toLowerCase();
-  
-  if (urgentKeywords.some(keyword => lowerDescription.includes(keyword))) {
-    return 'urgent';
-  }
-  
-  if (highKeywords.some(keyword => lowerDescription.includes(keyword))) {
-    return 'high';
-  }
-  
-  if (mediumKeywords.some(keyword => lowerDescription.includes(keyword))) {
-    return 'medium';
-  }
-  
-  return 'low';
-};
+// Usar o novo classificador de urgência
+export { classifyUrgency, getUrgencyLabel, getUrgencyColor } from './urgencyClassifier';

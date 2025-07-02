@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { classifyUrgency } from './urgencyClassifier';
 import type { Database } from '@/integrations/supabase/types';
 
 type StatusOrcamento = Database['public']['Enums']['status_orcamento'];
@@ -13,6 +14,10 @@ export const saveOrcamento = async (formData: {
   try {
     console.log('Salvando orçamento no Supabase:', formData);
 
+    // Classificar urgência automaticamente usando IA
+    const urgencyAnalysis = classifyUrgency(formData.projectDescription);
+    console.log('Análise de urgência:', urgencyAnalysis);
+
     // Usar as funções de criptografia do Supabase
     const { data: emailCriptografado } = await supabase.rpc('criptografar_email', {
       email_texto: formData.email
@@ -26,7 +31,7 @@ export const saveOrcamento = async (formData: {
       throw new Error('Erro ao criptografar dados sensíveis');
     }
 
-    // Salvar no banco de dados
+    // Salvar no banco de dados com urgência classificada automaticamente
     const { data, error } = await supabase
       .from('orcamentos')
       .insert({
@@ -35,10 +40,10 @@ export const saveOrcamento = async (formData: {
         telefone_criptografado: telefoneCriptografado,
         servicos: formData.services,
         descricao_projeto: formData.projectDescription,
-        urgencia: 'medium', // Padrão, pode ser implementada lógica para definir automaticamente
+        urgencia: urgencyAnalysis.level, // IA classificou automaticamente
         status: 'pendente',
         origem: 'web',
-        ip_origem: null, // Pode ser implementado para capturar IP do cliente
+        ip_origem: null,
         user_agent: navigator.userAgent
       })
       .select()
@@ -49,8 +54,8 @@ export const saveOrcamento = async (formData: {
       throw error;
     }
 
-    console.log('Orçamento salvo com sucesso:', data);
-    return data;
+    console.log('Orçamento salvo com sucesso com urgência:', urgencyAnalysis.level, data);
+    return { data, urgencyAnalysis };
   } catch (error) {
     console.error('Erro no saveOrcamento:', error);
     throw error;

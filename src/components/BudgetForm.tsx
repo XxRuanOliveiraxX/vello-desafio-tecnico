@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { ServiceSelector } from './ServiceSelector';
-import { validateForm, formatPhoneNumber, FormData } from '@/utils/formUtils';
+import { UrgencyIndicator } from './UrgencyIndicator';
+import { validateForm, formatPhoneNumber, FormData, classifyUrgency } from '@/utils/formUtils';
 import { saveOrcamento } from '@/utils/supabaseHelpers';
 
 export const BudgetForm = () => {
@@ -24,6 +26,7 @@ export const BudgetForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [urgencyAnalysis, setUrgencyAnalysis] = useState<ReturnType<typeof classifyUrgency> | null>(null);
   const { toast } = useToast();
 
   console.log('BudgetForm rendered, formData:', formData);
@@ -41,6 +44,15 @@ export const BudgetForm = () => {
       ...prev,
       [field]: processedValue
     }));
+    
+    // Analisar urgência em tempo real quando a descrição muda
+    if (field === 'projectDescription' && value.length > 20) {
+      const analysis = classifyUrgency(value);
+      setUrgencyAnalysis(analysis);
+      console.log('Análise de urgência atualizada:', analysis);
+    } else if (field === 'projectDescription' && value.length <= 20) {
+      setUrgencyAnalysis(null);
+    }
     
     // Limpar erro do campo quando usuário começar a digitar
     if (errors[field]) {
@@ -70,8 +82,8 @@ export const BudgetForm = () => {
     setErrors({});
 
     try {
-      // Salvar no Supabase
-      await saveOrcamento({
+      // Salvar no Supabase (com classificação automática de urgência)
+      const result = await saveOrcamento({
         fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
@@ -79,7 +91,7 @@ export const BudgetForm = () => {
         projectDescription: formData.projectDescription,
       });
 
-      // Enviar para o webhook n8n com dados organizados
+      // Enviar para o webhook n8n com dados organizados incluindo urgência
       try {
         const webhookUrl = 'https://xxruanxx.app.n8n.cloud/webhook-test/vello-form';
         
@@ -91,17 +103,21 @@ export const BudgetForm = () => {
           },
           projeto: {
             servicos_solicitados: formData.services,
-            descricao_detalhada: formData.projectDescription
+            descricao_detalhada: formData.projectDescription,
+            urgencia_detectada: result.urgencyAnalysis.level,
+            pontuacao_urgencia: result.urgencyAnalysis.score,
+            motivos_urgencia: result.urgencyAnalysis.reasons
           },
           metadados: {
             timestamp: new Date().toISOString(),
             origem: 'vello-form',
             user_agent: navigator.userAgent,
-            url_origem: window.location.href
+            url_origem: window.location.href,
+            id_orcamento: result.data.id
           }
         };
 
-        console.log('Enviando dados para n8n:', webhookData);
+        console.log('Enviando dados para n8n com análise de urgência:', webhookData);
 
         await fetch(webhookUrl, {
           method: 'POST',
@@ -119,7 +135,7 @@ export const BudgetForm = () => {
       setSubmitSuccess(true);
       toast({
         title: "Orçamento enviado com sucesso! ✅",
-        description: "Seus dados foram salvos com segurança. Nossa equipe entrará em contato em breve.",
+        description: `Classificado como ${result.urgencyAnalysis.level.toUpperCase()}. Nossa equipe entrará em contato em breve.`,
       });
       
       // Reset form after 3 seconds
@@ -133,6 +149,7 @@ export const BudgetForm = () => {
           acceptTerms: false
         });
         setSubmitSuccess(false);
+        setUrgencyAnalysis(null);
       }, 3000);
 
     } catch (error) {
@@ -264,6 +281,21 @@ export const BudgetForm = () => {
                 <AlertCircle className="w-4 h-4" />
                 {errors.projectDescription}
               </p>
+            )}
+            
+            {/* Indicador de Urgência em Tempo Real */}
+            {urgencyAnalysis && (
+              <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <h4 className="text-sm font-medium text-blue-900 mb-2">
+                  🤖 Análise Automática de Prioridade:
+                </h4>
+                <UrgencyIndicator 
+                  level={urgencyAnalysis.level}
+                  score={urgencyAnalysis.score}
+                  reasons={urgencyAnalysis.reasons}
+                  showDetails={true}
+                />
+              </div>
             )}
           </div>
 
