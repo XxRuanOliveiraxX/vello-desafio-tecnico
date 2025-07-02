@@ -125,3 +125,50 @@ export const updateOrcamentoStatus = async (id: string, status: StatusOrcamento)
     throw error;
   }
 };
+
+export const updateOrcamentoUrgencia = async (id: string, urgencia: string) => {
+  try {
+    // Buscar dados atuais do orçamento para logging
+    const { data: orcamentoAtual, error: fetchError } = await supabase
+      .from('orcamentos')
+      .select('urgencia, nome_completo')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    // Atualizar urgência
+    const { data, error } = await supabase
+      .from('orcamentos')
+      .update({ urgencia })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Registrar evento de alteração de urgência nos logs
+    const { error: logError } = await supabase
+      .from('logs_eventos')
+      .insert({
+        orcamento_id: id,
+        tipo_evento: 'status_alterado',
+        nivel: 'info',
+        mensagem: `Urgência alterada de ${orcamentoAtual.urgencia} para ${urgencia} para ${orcamentoAtual.nome_completo}`,
+        detalhes: {
+          urgencia_anterior: orcamentoAtual.urgencia,
+          urgencia_nova: urgencia,
+          alterado_manualmente: true
+        }
+      });
+
+    if (logError) {
+      console.error('Erro ao registrar log de alteração de urgência:', logError);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Erro ao atualizar urgência do orçamento:', error);
+    throw error;
+  }
+};

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Search, Filter, Download, Eye, Mail, MessageSquare, RefreshCw } from 'lucide-react';
-import { getOrcamentos, updateOrcamentoStatus } from '@/utils/supabaseHelpers';
+import { getOrcamentos, updateOrcamentoStatus, updateOrcamentoUrgencia } from '@/utils/supabaseHelpers';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -154,6 +153,25 @@ export const BudgetList = () => {
       toast({
         title: "Erro ao atualizar status",
         description: "Não foi possível atualizar o status do orçamento.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUrgencyUpdate = async (id: string, newUrgency: string) => {
+    try {
+      await updateOrcamentoUrgencia(id, newUrgency);
+      toast({
+        title: "Urgência atualizada",
+        description: `Urgência do orçamento atualizada para ${formatUrgency(newUrgency)}.`,
+      });
+      // Recarregar lista
+      loadOrcamentos();
+    } catch (error) {
+      console.error('Erro ao atualizar urgência:', error);
+      toast({
+        title: "Erro ao atualizar urgência",
+        description: "Não foi possível atualizar a urgência do orçamento.",
         variant: "destructive",
       });
     }
@@ -312,9 +330,22 @@ export const BudgetList = () => {
                     </Select>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getUrgencyColor(budget.urgencia)}>
-                      {formatUrgency(budget.urgencia)}
-                    </Badge>
+                    <Select 
+                      value={budget.urgencia} 
+                      onValueChange={(value) => handleUrgencyUpdate(budget.id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <Badge className={getUrgencyColor(budget.urgencia)}>
+                          {formatUrgency(budget.urgencia)}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Baixa</SelectItem>
+                        <SelectItem value="medium">Média</SelectItem>
+                        <SelectItem value="high">Alta</SelectItem>
+                        <SelectItem value="urgent">Urgente</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell className="text-sm">
                     {new Date(budget.created_at).toLocaleDateString('pt-BR')}
