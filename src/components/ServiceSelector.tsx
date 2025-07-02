@@ -69,6 +69,11 @@ export const ServiceSelector = ({ selectedServices, onServicesChange, error }: S
     if (isSelected) {
       newServices = selectedServices.filter(id => id !== serviceId);
     } else {
+      // Verificar se já tem 2 serviços selecionados
+      if (selectedServices.length >= 2) {
+        console.log('Máximo de 2 serviços já selecionados');
+        return; // Não permite selecionar mais de 2
+      }
       newServices = [...selectedServices, serviceId];
     }
     
@@ -79,27 +84,34 @@ export const ServiceSelector = ({ selectedServices, onServicesChange, error }: S
   return (
     <div className="space-y-4">
       <Label className="text-sm font-semibold text-gray-700">
-        Serviços Desejados * <span className="text-xs text-gray-500">(selecione um ou mais)</span>
+        Serviços Desejados * <span className="text-xs text-gray-500">(selecione até 2 opções)</span>
       </Label>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {SERVICES.map((service) => {
           const isSelected = selectedServices.includes(service.id);
+          const isDisabled = !isSelected && selectedServices.length >= 2;
           
           return (
             <div
               key={service.id}
-              className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md ${
+              className={`relative border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                isDisabled 
+                  ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                  : 'hover:shadow-md'
+              } ${
                 isSelected 
                   ? 'border-vello-blue bg-blue-50 shadow-md' 
                   : 'border-gray-200 hover:border-gray-300'
               } ${error ? 'border-red-300' : ''}`}
-              onClick={() => handleServiceToggle(service.id)}
+              onClick={() => !isDisabled && handleServiceToggle(service.id)}
             >
               <div className="flex items-start space-x-3">
                 <div className={`mt-1 w-4 h-4 border-2 rounded-sm flex items-center justify-center transition-colors ${
                   isSelected 
                     ? 'bg-vello-blue border-vello-blue' 
+                    : isDisabled
+                    ? 'border-gray-300'
                     : 'border-gray-300'
                 }`}>
                   {isSelected && (
@@ -109,11 +121,19 @@ export const ServiceSelector = ({ selectedServices, onServicesChange, error }: S
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center space-x-2">
                     <span className="text-xl">{service.icon}</span>
-                    <h4 className={`font-medium ${isSelected ? 'text-vello-blue' : 'text-gray-900'}`}>
+                    <h4 className={`font-medium ${
+                      isSelected 
+                        ? 'text-vello-blue' 
+                        : isDisabled 
+                        ? 'text-gray-400'
+                        : 'text-gray-900'
+                    }`}>
                       {service.name}
                     </h4>
                   </div>
-                  <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                  <p className={`text-xs mt-1 leading-relaxed ${
+                    isDisabled ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
                     {service.description}
                   </p>
                 </div>
@@ -139,11 +159,16 @@ export const ServiceSelector = ({ selectedServices, onServicesChange, error }: S
       {selectedServices.length > 0 && (
         <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
           <p className="text-sm text-blue-800">
-            <strong>Serviços selecionados:</strong>{' '}
+            <strong>Serviços selecionados ({selectedServices.length}/2):</strong>{' '}
             {selectedServices.map(id => 
               SERVICES.find(s => s.id === id)?.name
             ).join(', ')}
           </p>
+          {selectedServices.length === 2 && (
+            <p className="text-xs text-blue-600 mt-1">
+              Máximo de serviços atingido. Desmarque um serviço para selecionar outro.
+            </p>
+          )}
         </div>
       )}
     </div>
