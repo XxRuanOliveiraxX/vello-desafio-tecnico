@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,25 +79,41 @@ export const BudgetForm = () => {
         projectDescription: formData.projectDescription,
       });
 
-      // Também enviar para o webhook n8n (como backup/integração)
+      // Enviar para o webhook n8n com dados organizados
       try {
-        const webhookUrl = 'https://xxruanxx.app.n8n.cloud/webhook-test/form-lovable';
+        const webhookUrl = 'https://xxruanxx.app.n8n.cloud/webhook-test/vello-form';
         
+        const webhookData = {
+          cliente: {
+            nome_completo: formData.fullName,
+            email: formData.email,
+            telefone: formData.phone
+          },
+          projeto: {
+            servicos_solicitados: formData.services,
+            descricao_detalhada: formData.projectDescription
+          },
+          metadados: {
+            timestamp: new Date().toISOString(),
+            origem: 'vello-form',
+            user_agent: navigator.userAgent,
+            url_origem: window.location.href
+          }
+        };
+
+        console.log('Enviando dados para n8n:', webhookData);
+
         await fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            ...formData,
-            timestamp: new Date().toISOString(),
-            source: 'lovable-form'
-          }),
+          body: JSON.stringify(webhookData),
         });
 
-        console.log('Webhook enviado com sucesso');
+        console.log('Webhook n8n enviado com sucesso');
       } catch (webhookError) {
-        console.warn('Erro ao enviar webhook (não crítico):', webhookError);
+        console.warn('Erro ao enviar webhook n8n (não crítico):', webhookError);
       }
 
       setSubmitSuccess(true);
