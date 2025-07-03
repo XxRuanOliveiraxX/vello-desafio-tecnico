@@ -1,71 +1,34 @@
 
-import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DashboardMetrics } from './DashboardMetrics';
 import { BudgetList } from './BudgetList';
 import { SystemLogs } from './SystemLogs';
-import { BarChart3, Users, TrendingUp, Settings } from 'lucide-react';
+import { BarChart3, Users, TrendingUp, Settings, LogOut, Loader2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { AuthLogin } from './AuthLogin';
 
 export const AdminPanel = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const { user, loading, isAdmin, signOut } = useAuth();
 
-  // Simulação de autenticação simples
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loginData.email === 'admin@vellogroup.com' && loginData.password === 'admin123') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Credenciais inválidas');
-    }
+  const handleSignOut = async () => {
+    await signOut();
   };
 
-  if (!isAuthenticated) {
+  if (loading) {
     return (
-      <div className="max-w-md mx-auto">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Login Administrativo</CardTitle>
-            <CardDescription>
-              Acesse o painel de controle da Vello Group
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
-                <input
-                  type="email"
-                  value={loginData.email}
-                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="admin@vellogroup.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Senha</label>
-                <input
-                  type="password"
-                  value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-                  className="w-full p-3 border rounded-lg"
-                  placeholder="••••••••"
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Entrar
-              </Button>
-            </form>
-            <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
-              <strong>Demo:</strong> admin@vellogroup.com / admin123
-            </div>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Verificando autenticação...</span>
+        </div>
       </div>
     );
+  }
+
+  if (!user || !isAdmin) {
+    return <AuthLogin />;
   }
 
   return (
@@ -73,12 +36,16 @@ export const AdminPanel = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Painel Administrativo</h1>
-          <p className="text-gray-600 mt-2">Gerencie orçamentos e monitore métricas do sistema</p>
+          <p className="text-gray-600 mt-2">
+            Bem-vindo, {user.email} - Gerencie orçamentos e monitore métricas do sistema
+          </p>
         </div>
         <Button 
           variant="outline" 
-          onClick={() => setIsAuthenticated(false)}
+          onClick={handleSignOut}
+          className="flex items-center gap-2"
         >
+          <LogOut className="w-4 h-4" />
           Sair
         </Button>
       </div>
