@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { classifyUrgency } from './urgencyClassifier';
 import type { Database } from '@/integrations/supabase/types';
@@ -41,7 +40,7 @@ export const saveOrcamento = async (formData: {
         telefone_criptografado: telefoneCriptografado,
         servicos: formData.services,
         descricao_projeto: formData.projectDescription,
-        urgencia: urgencyAnalysis.level,
+        urgencia: urgencyAnalysis.level, // IA classificou automaticamente
         status: 'pendente',
         origem: 'web',
         ip_origem: null,
@@ -65,22 +64,12 @@ export const saveOrcamento = async (formData: {
 
 export const getOrcamentos = async () => {
   try {
-    // Verificar se o usuário está autenticado e é admin
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('Usuário não autenticado');
-    }
-
     const { data, error } = await supabase
       .from('view_orcamentos_admin')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Erro detalhado ao buscar orçamentos:', error);
-      throw error;
-    }
-    
+    if (error) throw error;
     return data;
   } catch (error) {
     console.error('Erro ao buscar orçamentos:', error);
@@ -90,12 +79,6 @@ export const getOrcamentos = async () => {
 
 export const getLogsEventos = async () => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('Usuário não autenticado');
-    }
-
     const { data, error } = await supabase
       .from('logs_eventos')
       .select('*')
@@ -112,12 +95,6 @@ export const getLogsEventos = async () => {
 
 export const getLogsErros = async () => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('Usuário não autenticado');
-    }
-
     const { data, error } = await supabase
       .from('logs_erros')
       .select('*')
@@ -134,12 +111,6 @@ export const getLogsErros = async () => {
 
 export const updateOrcamentoStatus = async (id: string, status: StatusOrcamento) => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('Usuário não autenticado');
-    }
-
     const { data, error } = await supabase
       .from('orcamentos')
       .update({ status })
@@ -157,12 +128,6 @@ export const updateOrcamentoStatus = async (id: string, status: StatusOrcamento)
 
 export const updateOrcamentoUrgencia = async (id: string, urgencia: string) => {
   try {
-    // Verificar se o usuário está autenticado
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw new Error('Usuário não autenticado');
-    }
-
     // Buscar dados atuais do orçamento para logging
     const { data: orcamentoAtual, error: fetchError } = await supabase
       .from('orcamentos')
