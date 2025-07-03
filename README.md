@@ -290,4 +290,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **Desenvolvido com ❤️ por Ruan Oliveira**
 
-Entre em contato comigo através do linkedin, visite [Ruan Oliveira](www.linkedin.com/in/ruan07)
+Entre em contato comigo através do linkedin, visite www.linkedin.com/in/ruan07
