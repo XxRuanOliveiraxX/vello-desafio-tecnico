@@ -11,8 +11,13 @@ export const useAuth = () => {
 
   const checkAdminStatus = async (userId: string): Promise<boolean> => {
     try {
-      // Use a raw SQL query to check admin status since admin_profiles isn't in generated types yet
-      const { data, error } = await supabase.rpc('is_admin', { user_id: userId });
+      // Query the admin_profiles table directly using a raw SQL query
+      const { data, error } = await supabase
+        .from('admin_profiles')
+        .select('active')
+        .eq('user_id', userId)
+        .eq('active', true)
+        .maybeSingle();
       
       if (error) {
         console.error('Error checking admin status:', error);
