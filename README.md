@@ -1,4 +1,3 @@
-
 # Vello Group - Sistema de Orçamentos
 
 ![Vello Group](https://img.shields.io/badge/Vello-Group-blue)
@@ -54,8 +53,8 @@ O **Vello Group** é uma aplicação web moderna para gerenciamento de orçament
 
 ### 1. Clone o Repositório
 ```bash
-git clone <URL_DO_REPOSITORIO>
-cd vello-group-orcamentos
+git clone https://github.com/XxRuanOliveiraxX/vello-desafio-tecnico.git
+cd vello-desafio-tecnico
 ```
 
 ### 2. Instale as Dependências
@@ -252,7 +251,6 @@ npm run lint         # Verificação de código
 ### Em Desenvolvimento
 - [ ] Módulo de análises avançadas
 - [ ] Integração com Google Analytics
-- [ ] Sistema de notificações por email
 - [ ] API REST para integrações externas
 - [ ] Aplicativo mobile (React Native)
 
@@ -260,7 +258,6 @@ npm run lint         # Verificação de código
 - [ ] Chat em tempo real com clientes
 - [ ] Sistema de templates de orçamento
 - [ ] Integração com CRM externo
-- [ ] Relatórios PDF automatizados
 - [ ] Dashboard de performance da equipe
 
 ## 🤝 Contribuição
@@ -279,13 +276,6 @@ npm run lint         # Verificação de código
 - Hooks customizados com prefixo `use`
 - Commits em português, descritivos
 
-## 📞 Suporte e Contato
-
-### Time de Desenvolvimento
-- **Vello Group** - Soluções Tecnológicas
-- **Email**: contato@vellogroup.com
-- **Website**: https://vellogroup.com
-
 ### Documentação Adicional
 - [Supabase Docs](https://supabase.com/docs)
 - [React Docs](https://react.dev)
@@ -298,6 +288,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ---
 
-**Desenvolvido com ❤️ pela equipe Vello Group**
+**Desenvolvido com ❤️ por Ruan Oliveira**
 
-Para mais informações sobre nossa empresa e serviços, visite [vellogroup.com](https://vellogroup.com)
+Entre em contato comigo através do linkedin, visite [Ruan Oliveira](www.linkedin.com/in/ruan07)
