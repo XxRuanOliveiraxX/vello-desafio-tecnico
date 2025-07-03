@@ -9,6 +9,27 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkAdminStatus = async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_profiles')
+        .select('active')
+        .eq('user_id', userId)
+        .eq('active', true)
+        .single();
+      
+      if (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+      }
+      
+      return data?.active || false;
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -17,19 +38,10 @@ export const useAuth = () => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Check if user is admin
+          // Check if user is admin using setTimeout to prevent deadlock
           setTimeout(async () => {
-            try {
-              const { data, error } = await supabase.rpc('is_admin', {
-                user_id: session.user.id
-              });
-              if (!error) {
-                setIsAdmin(data || false);
-              }
-            } catch (error) {
-              console.error('Error checking admin status:', error);
-              setIsAdmin(false);
-            }
+            const adminStatus = await checkAdminStatus(session.user.id);
+            setIsAdmin(adminStatus);
           }, 0);
         } else {
           setIsAdmin(false);
@@ -39,25 +51,25 @@ export const useAuth = () => {
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         // Check admin status for existing session
-        supabase.rpc('is_admin', { user_id: session.user.id })
-          .then(({ data, error }) => {
-            if (!error) {
-              setIsAdmin(data || false);
-            }
-            setLoading(false);
-          })
-          .catch(() => {
-            setIsAdmin(false);
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
+        try {
+          const adminStatus = await checkAdminStatus(session.user.id);
+          setIsAdmin(adminStatus);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
       }
+      
+      setLoading(false);
+    }).catch((error) => {
+      console.error('Error getting session:', error);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
