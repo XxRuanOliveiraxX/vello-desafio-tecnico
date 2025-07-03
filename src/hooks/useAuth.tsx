@@ -2,34 +2,13 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { checkUserIsAdmin } from '@/utils/adminCheck';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-
-  const checkAdminStatus = async (userId: string): Promise<boolean> => {
-    try {
-      // Query the admin_profiles table directly using a raw SQL query
-      const { data, error } = await supabase
-        .from('admin_profiles')
-        .select('active')
-        .eq('user_id', userId)
-        .eq('active', true)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error checking admin status:', error);
-        return false;
-      }
-      
-      return Boolean(data);
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      return false;
-    }
-  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -41,7 +20,7 @@ export const useAuth = () => {
         if (session?.user) {
           // Check if user is admin using setTimeout to prevent deadlock
           setTimeout(async () => {
-            const adminStatus = await checkAdminStatus(session.user.id);
+            const adminStatus = await checkUserIsAdmin(session.user.id);
             setIsAdmin(adminStatus);
           }, 0);
         } else {
@@ -59,7 +38,7 @@ export const useAuth = () => {
       if (session?.user) {
         // Check admin status for existing session
         try {
-          const adminStatus = await checkAdminStatus(session.user.id);
+          const adminStatus = await checkUserIsAdmin(session.user.id);
           setIsAdmin(adminStatus);
         } catch (error) {
           console.error('Error checking admin status:', error);
