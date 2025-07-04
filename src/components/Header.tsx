@@ -36,7 +36,7 @@ export const Header = ({ currentView, setCurrentView }: HeaderProps) => {
             <Button
               variant={currentView === 'admin' ? 'default' : 'outline'}
               onClick={() => setCurrentView('admin')}
-              className="transition-all duration-200 bg-vello-blue hover:bg-vello-blue/90 text-white border-vello-blue"
+              className="transition-all duration-200 bg-vello-orange hover:bg-vello-orange/90 text-white border-vello-orange"
             >
               Painel Admin
             </Button>
