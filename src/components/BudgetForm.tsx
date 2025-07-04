@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -330,7 +329,7 @@ export const BudgetForm = () => {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 text-lg font-semibold bg-vello-blue hover:bg-vello-blue-dark transition-all duration-300 transform hover:scale-[1.02]"
+            className="w-full py-4 text-lg font-semibold bg-vello-orange hover:bg-vello-orange/90 transition-all duration-300 transform hover:scale-[1.02]"
           >
             {isSubmitting ? (
               <>
