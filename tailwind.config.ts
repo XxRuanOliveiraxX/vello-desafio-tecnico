@@ -26,13 +26,13 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(221 83% 53%)',
-					foreground: 'hsl(210 40% 98%)',
-					50: 'hsl(221 100% 97%)',
-					100: 'hsl(221 100% 94%)',
-					500: 'hsl(221 83% 53%)',
-					600: 'hsl(221 83% 45%)',
-					700: 'hsl(221 83% 38%)',
+					DEFAULT: 'hsl(8 100% 60%)', // #ff4e35
+					foreground: 'hsl(0 0% 100%)',
+					50: 'hsl(8 100% 97%)',
+					100: 'hsl(8 100% 94%)',
+					500: 'hsl(8 100% 60%)',
+					600: 'hsl(8 100% 52%)',
+					700: 'hsl(8 100% 45%)',
 				},
 				secondary: {
 					DEFAULT: 'hsl(210 40% 96.1%)',
@@ -69,10 +69,13 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				vello: {
-					blue: 'hsl(221 83% 53%)',
-					'blue-dark': 'hsl(221 83% 38%)',
-					gray: 'hsl(220 9% 46%)',
-					'gray-light': 'hsl(220 13% 91%)',
+					orange: 'hsl(8 100% 60%)', // #ff4e35
+					'orange-dark': 'hsl(8 100% 45%)',
+					blue: 'hsl(217 100% 39%)', // #003b8c
+					'blue-dark': 'hsl(217 100% 32%)',
+					gray: 'hsl(215 11% 96%)', // #f4f5f8
+					'gray-light': 'hsl(215 11% 98%)',
+					black: 'hsl(0 0% 0%)', // #000000
 				}
 			},
 			borderRadius: {
